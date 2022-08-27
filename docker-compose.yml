@@ -2,10 +2,8 @@ version: '3.8'
 services:
   postgres:
     image: postgres:13.2-alpine
-    environment:
-      POSTGRES_USER: api
-      POSTGRES_PASSWORD: api
-      POSTGRES_DB: api
+    env_file:
+      - configurations.toml
     ports:
       - 5432:5432
     volumes:
