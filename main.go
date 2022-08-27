@@ -11,15 +11,14 @@ import (
 )
 
 func main() {
-	// Load the configuration environment.
-	config.Init()
+	// Load configurations
+	config.Load()
 
 	// Create a new router
 	routes := router.Generate()
 
-	fmt.Println("Started server on port", config.API_PORT)
+	fmt.Printf("Started server on PORT %s", config.GetServerPORT())
 
 	// Start the server
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.API_PORT), routes))
-
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.GetServerPORT()), routes))
 }
