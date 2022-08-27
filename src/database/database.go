@@ -33,5 +33,7 @@ func OpenConnectionDATABASE() (*sql.DB, error) {
 		log.Printf("Error ping to database: %s", err)
 	}
 
+	fmt.Printf("Connection to database OK: %s", database)
+
 	return database, nil
 }
