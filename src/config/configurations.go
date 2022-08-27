@@ -2,39 +2,31 @@ package config
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"strconv"
 
-	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 var (
-	API_PORT          = 0
-	HOST              = ""
-	DATABASE_PORT     = 0
-	DATABASE_USER     = ""
-	DATABASE_PASSWORD = ""
-	DATABASE_NAME     = ""
-	DATABASE_HOST     = ""
-
+	API_PORT                   = 5000
 	STRING_CONNECTION_DATABASE = ""
+	POSTGRES_HOST              = "localhost"
+	POSTGRES_PORT              = 5432
+	POSTGRES_USER              = "api"
+	POSTGRES_PASSWORD          = "api"
+	POSTGRES_DB                = "api"
 )
 
 func Init() {
 	// Load the configuration environment variables
 	var err error
-	if err = godotenv.Load(); err != nil {
-		log.Fatal(err)
-	}
 
 	// Set the configuration values
-	API_PORT, err = strconv.Atoi(os.Getenv("API_PORT"))
 	if err != nil {
-		API_PORT = 3001
+		API_PORT = 5000
 	}
 
 	// Set the configuration values
-	STRING_CONNECTION_DATABASE = fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", os.Getenv("DATABASE_USER"), os.Getenv("DATABASE_PASSWORD"), os.Getenv("DATABASE_HOST"), os.Getenv("DATABASE_NAME"))
+	STRING_CONNECTION_DATABASE = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB)
 
+	fmt.Println("Connect database status Ok:", STRING_CONNECTION_DATABASE)
 }

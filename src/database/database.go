@@ -3,20 +3,23 @@ package database
 import (
 	"api/src/config"
 	"database/sql"
-	"log"
+	"fmt"
 
 	_ "github.com/lib/pq"
 )
 
-func ConnectDB(*sql.DB, error) {
+func ConnectDB() (*sql.DB, error) {
 	db, err := sql.Open("postgres", config.STRING_CONNECTION_DATABASE)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("ERRO AQUI ", err)
+		panic(err)
 	}
 
-	if err = db.Ping(); err != nil {
-		db.Close()
+	err = db.Ping()
+	if err != nil {
+		fmt.Println("ERRO AQUI ", err)
+		panic(err)
 	}
 
-	return
+	return db, nil
 }

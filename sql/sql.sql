@@ -1,4 +1,4 @@
-CREATE DATABASE database;
+CREATE DATABASE api;
 
 DROP TABLE IF EXISTS users;
 

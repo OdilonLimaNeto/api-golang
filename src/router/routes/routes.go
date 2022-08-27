@@ -7,10 +7,10 @@ import (
 )
 
 // Struct representing all routes on API
-type Routes struct {
+type Route struct {
 	URI                    string
 	Method                 string
-	HandlerFunc            func(w http.ResponseWriter, r *http.Request)
+	HandlerFunc            func(http.ResponseWriter, *http.Request)
 	requiredAuthentication bool
 }
 
