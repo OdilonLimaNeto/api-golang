@@ -1,32 +1,65 @@
 package config
 
 import (
-	"fmt"
+	"log"
 
 	_ "github.com/lib/pq"
+	"github.com/spf13/viper"
 )
 
 var (
-	API_PORT                   = 5000
+	config                     *configuration
 	STRING_CONNECTION_DATABASE = ""
-	POSTGRES_HOST              = "localhost"
-	POSTGRES_PORT              = 5432
-	POSTGRES_USER              = "api"
-	POSTGRES_PASSWORD          = "api"
-	POSTGRES_DB                = "api"
 )
 
-func Init() {
-	// Load the configuration environment variables
-	var err error
+type configuration struct {
+	API APIConfiguration
+	DB  DBConfiguration
+}
 
-	// Set the configuration values
+type APIConfiguration struct {
+	PORT string
+}
+
+type DBConfiguration struct {
+	USER     string
+	PASSWORD string
+	HOST     string
+	PORT     string
+	NAME     string
+}
+
+func Load() error {
+	viper.SetConfigName("configurations")
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
 	if err != nil {
-		API_PORT = 5000
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Printf("No config file found %v", err)
+			return err
+		}
 	}
 
-	// Set the configuration values
-	STRING_CONNECTION_DATABASE = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB)
+	config = new(configuration)
+	config.API = APIConfiguration{
+		PORT: viper.GetString("api.port"),
+	}
 
-	fmt.Println("Connect database status Ok:", STRING_CONNECTION_DATABASE)
+	config.DB = DBConfiguration{
+		USER:     viper.GetString("database.user"),
+		PASSWORD: viper.GetString("database.password"),
+		HOST:     viper.GetString("database.host"),
+		PORT:     viper.GetString("database.port"),
+		NAME:     viper.GetString("database.name"),
+	}
+	return nil
+}
+
+func GetDB() DBConfiguration {
+	return config.DB
+}
+
+func GetServerPORT() string {
+	return config.API.PORT
 }

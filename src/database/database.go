@@ -4,22 +4,34 @@ import (
 	"api/src/config"
 	"database/sql"
 	"fmt"
+	"log"
 
 	_ "github.com/lib/pq"
 )
 
-func ConnectDB() (*sql.DB, error) {
-	db, err := sql.Open("postgres", config.STRING_CONNECTION_DATABASE)
+func OpenConnectionDATABASE() (*sql.DB, error) {
+	configurations := config.GetDB()
+
+	var (
+		HOST     = configurations.HOST
+		PORT     = configurations.PORT
+		USER     = configurations.USER
+		PASSWORD = configurations.PASSWORD
+		NAME     = configurations.NAME
+	)
+
+	STRING_CONNECTION_DATABASE := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", HOST, PORT, USER, PASSWORD, NAME)
+
+	database, err := sql.Open("postgres", STRING_CONNECTION_DATABASE)
 	if err != nil {
-		fmt.Println("ERRO AQUI ", err)
-		panic(err)
+		log.Printf("Error open connection to database: %s", err)
+		return nil, err
 	}
 
-	err = db.Ping()
+	err = database.Ping()
 	if err != nil {
-		fmt.Println("ERRO AQUI ", err)
-		panic(err)
+		log.Printf("Error ping to database: %s", err)
 	}
 
-	return db, nil
+	return database, nil
 }
