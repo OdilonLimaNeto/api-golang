@@ -2,12 +2,31 @@ POST http://localhost:5000/users
 content-type: application/json
 
 {
-		"name": "John Doe",
-		"nick": "jdoe",
-		"email": "jdoe@mail.com",
-		"password": "password"
+		"name": "larae Doe",
+		"nick": "lara1",
+		"email": "lara1@mail.com",
+		"password": "123"
 }
 
 ###
 GET http://localhost:5000/users 
 content-type: application/json 
+
+###
+GET http://localhost:5000/users/2
+content-type: application/json 
+
+###
+PUT http://localhost:5000/users/2
+content-type: application/json 
+
+{
+		"name": "Odilon Neto",
+		"nick": "Dino",
+		"email": "dinolirobiro@gmail.com",
+		"password": "1234"
+}
+
+###
+DELETE http://localhost:5000/users/2
+content-type: application/json
