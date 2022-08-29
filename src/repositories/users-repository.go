@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"api/src/database"
 	"api/src/models"
 	"database/sql"
 	"log"
@@ -18,45 +17,24 @@ func NewUsersRepository(db *sql.DB) *Users {
 }
 
 // insert a new user into the database
-func Create(user models.User) (id uint64, err error) {
+func (repository Users) Create(user models.User) (id uint64, err error) {
 	var (
 		name     = user.Name
 		nick     = user.Nick
 		email    = user.Email
 		password = user.Password
 	)
-	connection, err := database.OpenConnectionDATABASE()
-	if err != nil {
-		return 0, err
-	}
-	defer connection.Close()
-
 	SQL := `
-	INSERT INTO users (name, nick, email, password) 
+	INSERT INTO public.user (name, nick, email, password) 
 	VALUES ($1, $2, $3, $4)
 	RETURNING id`
 
-	err = connection.QueryRow(SQL, name, nick, email, password).Scan(&id)
+	err = repository.db.QueryRow(SQL, name, nick, email, password).Scan(&id)
 
 	return id, err
 }
 
-func Get(id int64) (user models.User, err error) {
-	var (
-		name      = user.Name
-		nick      = user.Nick
-		email     = user.Email
-		password  = user.Password
-		createdAt = user.CreatedAt
-		updatedAt = user.UpdatedAt
-		deletedAt = user.DeletedAt
-	)
-	connection, err := database.OpenConnectionDATABASE()
-	if err != nil {
-		return user, err
-	}
-	defer connection.Close()
-
+func (repository Users) Get(id int64) (user models.User, err error) {
 	SQL := `
 	SELECT 
 		id, 
@@ -65,42 +43,32 @@ func Get(id int64) (user models.User, err error) {
 		email, 
 		password, 
 		created_at, 
-		updated_at, 
-		deleted_at 
+		updated_at
 	FROM 
-		users 
+		public.user
 	WHERE 
-		id = $1
+		id = $1 
 	`
-	err = connection.QueryRow(SQL, id).Scan(&user.ID, &name, &nick, &email, &password, &createdAt, &updatedAt, &deletedAt)
+	err = repository.db.QueryRow(SQL, id).Scan(&user.ID, &user.Name, &user.Nick, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return user, err
 	}
 	return user, nil
 }
 
-func GetAll() (users []models.User, err error) {
-	connection, err := database.OpenConnectionDATABASE()
-	if err != nil {
-		log.Printf("Error opening connection: %v", err)
-		return nil, err
-	}
-	defer connection.Close()
-
+func (repository Users) GetAll() (users []models.User, err error) {
 	SQL := `
-	SELECT 
-		id, 
-		name, 
-		nick, 
-		email, 
-		password, 
-		created_at, 
-		updated_at, 
-		deleted_at 
+	SELECT id,
+		name,
+		nick,
+		email,
+		password,
+		created_at,
+		updated_at
 	FROM 
-		users
+		public.user
 	`
-	rows, err := connection.Query(SQL)
+	rows, err := repository.db.Query(SQL)
 	if err != nil {
 		log.Printf("Error on get all users: %v", err)
 		return nil, err
@@ -109,7 +77,7 @@ func GetAll() (users []models.User, err error) {
 
 	for rows.Next() {
 		var user models.User
-		err := rows.Scan(&user.ID, &user.Name, &user.Nick, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt, &user.DeletedAt)
+		err := rows.Scan(&user.ID, &user.Name, &user.Nick, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			log.Printf("Error to get rows: %v", err)
 			continue
@@ -119,57 +87,30 @@ func GetAll() (users []models.User, err error) {
 	return users, nil
 }
 
-func Update(id int64, user models.User) (int64, error) {
-	var (
-		name      = user.Name
-		nick      = user.Nick
-		email     = user.Email
-		password  = user.Password
-		createdAt = user.CreatedAt
-		updatedAt = user.UpdatedAt
-		deletedAt = user.DeletedAt
-	)
-	connection, err := database.OpenConnectionDATABASE()
-	if err != nil {
-		return 0, err
-	}
-	defer connection.Close()
-
+func (repository Users) Update(id int64, user models.User) (int64, error) {
 	SQL := `
 	UPDATE 
-		users 
+		public.user
 	SET 
 		name = $1, 
 		nick = $2, 
 		email = $3, 
-		password = $4, 
+		password = $4,
 		created_at = $5,
-		updated_at = $6,
-		deleted_at = $7 
+		updated_at = $6
 	WHERE 
-		id = $8
+		id = $7
 	`
-	response, err := connection.Exec(SQL, name, nick, email, password, createdAt, updatedAt, deletedAt, id)
+	response, err := repository.db.Exec(SQL, user.Name, user.Nick, user.Email, user.Password, user.CreatedAt, user.UpdatedAt, id)
 	if err != nil {
 		return 0, err
 	}
 	return response.RowsAffected()
 }
 
-func Delete(id int64) (int64, error) {
-	connection, err := database.OpenConnectionDATABASE()
-	if err != nil {
-		log.Printf("Error opening connection: %v", err)
-		return 0, err
-	}
-	defer connection.Close()
-
-	SQL := `
-	DELETE FROM users 
-	WHERE 
-		id = $1
-	`
-	response, err := connection.Exec(SQL, id)
+func (repository Users) Delete(id int64) (int64, error) {
+	SQL := `DELETE FROM public.user WHERE id = $1`
+	response, err := repository.db.Exec(SQL, id)
 	if err != nil {
 		log.Printf("Error on delete user: %v", err)
 		return 0, err
